@@ -17,6 +17,15 @@ public class DBTest {
 
 	@Test
 	public void a_connectDB() {
+		// DB設定檔建立
+		DatabaseConfig config = new DBConfig();
+		// 將設定檔餵給DB，如果沒有餵，在ConnectPool內會拋出Exception 
+		Database.setDatabaseConfig(config);
+		try {
+			ConnectPool.setDatabase(Database.getDatabase());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		conn = ConnectPool.getConnection();
 		Assert.assertNotNull(conn);
 		ConnectPool.returnConnection(conn);

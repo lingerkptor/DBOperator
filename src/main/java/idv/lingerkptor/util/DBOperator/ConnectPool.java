@@ -28,12 +28,17 @@ public class ConnectPool {
 	/**
 	 * 資料庫實體
 	 */
-	private static Database db = Database.getDatabase();
+	private static Database db ;
 	/**
 	 * 儲存正在使用的Connection．
 	 */
-	private static List<Connection> usingConn= new ArrayList<Connection>(db.getMaxConnection());
+	private static List<Connection> usingConn;
 
+	public static void setDatabase(Database db) {
+		ConnectPool.db = db;
+		usingConn= new ArrayList<Connection>(db.getMaxConnection());
+	}
+	
 	/**
 	 *  取得可使用的connection
 	 * 
