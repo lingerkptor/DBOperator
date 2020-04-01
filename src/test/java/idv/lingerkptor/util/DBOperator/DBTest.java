@@ -17,9 +17,9 @@ public class DBTest {
 
 	@Test
 	public void a_connectDB() {
-		// DB³]©wÀÉ«Ø¥ß
+		// DBè¨­å®šæª”å»ºç«‹
 		DatabaseConfig config = new DBConfig();
-		// ±N³]©wÀÉÁıµ¹DB¡A¦pªG¨S¦³Áı¡A¦bConnectPool¤º·|©ß¥XException 
+		// å°‡è¨­å®šæª”é¤µçµ¦DBï¼Œå¦‚æœæ²’æœ‰é¤µï¼Œåœ¨ConnectPoolå…§æœƒæ‹‹å‡ºException 
 		Database.setDatabaseConfig(config);
 		try {
 			ConnectPool.setDatabase(Database.getDatabase());
@@ -52,8 +52,8 @@ public class DBTest {
 		checkData.addCheckData("test", 555);
 		checkData.addCheckData("test2", 666);
 		template.query(queryData, checkData);
-		Assert.assertEquals("¸ê®Æ¶q¤£¤@­P", true, checkData.checkSize());
-		Assert.assertEquals("¸ê®Æ¤º®e¤£¤@­P", true, checkData.checkData());
+		Assert.assertEquals("è³‡æ–™é‡ä¸ä¸€è‡´", true, checkData.checkSize());
+		Assert.assertEquals("è³‡æ–™å…§å®¹ä¸ä¸€è‡´", true, checkData.checkData());
 	}
 
 	@Test
@@ -70,8 +70,8 @@ public class DBTest {
 		checkData.addCheckData("test", 999);
 		checkData.addCheckData("test2", 666);
 		template.query(queryData, checkData);
-		Assert.assertEquals("¸ê®Æ¶q¤£¤@­P", true, checkData.checkSize());
-		Assert.assertEquals("¸ê®Æ¤º®e¤£¤@­P", true, checkData.checkData());
+		Assert.assertEquals("è³‡æ–™é‡ä¸ä¸€è‡´", true, checkData.checkSize());
+		Assert.assertEquals("è³‡æ–™å…§å®¹ä¸ä¸€è‡´", true, checkData.checkData());
 	}
 
 	@Test
@@ -87,8 +87,8 @@ public class DBTest {
 		QueryDataResult checkData = new QueryDataResult();
 		checkData.addCheckData("test", 999);
 		template.query(queryData, checkData);
-		Assert.assertEquals("¸ê®Æ¶q¤£¤@­P", true, checkData.checkSize());
-		Assert.assertEquals("¸ê®Æ¤º®e¤£¤@­P", true, checkData.checkData());
+		Assert.assertEquals("è³‡æ–™é‡ä¸ä¸€è‡´", true, checkData.checkSize());
+		Assert.assertEquals("è³‡æ–™å…§å®¹ä¸ä¸€è‡´", true, checkData.checkData());
 	}
 
 	@Test

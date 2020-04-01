@@ -6,21 +6,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * ¥Î¨ÓºŞ²zconnection¡A³Ğ³y¡B¦^¦¬¡BÄÀ©ñªºÃş§O
+ * ç”¨ä¾†ç®¡ç†connectionï¼Œå‰µé€ ã€å›æ”¶ã€é‡‹æ”¾çš„é¡åˆ¥
  * 
  *  created by lingerkptor 2020/03/27
  */
 public class ConnectPool {
 	/**
-	 *  Àx¦s¥i¨Ï¥Îªºconnectionªºpool  
+	 *  å„²å­˜å¯ä½¿ç”¨çš„connectionçš„pool  
 	 */
 	private static List<Connection> pool= new ArrayList<Connection>();
 	/**
-	 * ¸ê®Æ®w¹êÅé
+	 * è³‡æ–™åº«å¯¦é«”
 	 */
 	private static Database db ;
 	/**
-	 * Àx¦s¥¿¦b¨Ï¥ÎªºConnection¡D
+	 * å„²å­˜æ­£åœ¨ä½¿ç”¨çš„Connectionï¼
 	 */
 	private static List<Connection> usingConn;
 
@@ -30,14 +30,15 @@ public class ConnectPool {
 	}
 	
 	/**
-	 *  ¨ú±o¥i¨Ï¥Îªºconnection
+	 *  å–å¾—å¯ä½¿ç”¨çš„connection
 	 * 
-	 * @return ±qconnection pool®³connection¡A¦pªGpool³£®³§¹ªº®É­Ô¦^¶Çnull
+	 * @return å¾connection poolæ‹¿connectionï¼Œå¦‚æœpooléƒ½æ‹¿å®Œçš„æ™‚å€™å›å‚³null
 	 */
 	public synchronized static Connection getConnection() {
 		Connection conn = null;
 		if (usingConn.size() < db.getMaxConnection()) {
 			if (pool.isEmpty()) {
+				// è³‡æ–™åº«é€£æ¥
 				conn = db.conecting();
 			} else {
 				conn = pool.get(0);
@@ -50,7 +51,7 @@ public class ConnectPool {
 	}
 
 	/**
-	 * ÂkÁÙconnection ¡A¥H«K«áÄò¨Ï¥Î¡D
+	 * æ­¸é‚„connection ï¼Œä»¥ä¾¿å¾ŒçºŒä½¿ç”¨ï¼
 	 * 
 	 * @param  DB connection
 	 */
@@ -60,9 +61,9 @@ public class ConnectPool {
 	}
 
 	/**
-	 * Ãö³¬pool¤¤ªº©Ò¦³connection
+	 * é—œé–‰poolä¸­çš„æ‰€æœ‰connection
 	 * 
-	 * @return¡@Ãö³¬¬O§_¦¨¥\¡A¦pªG¦³ÁÙ¦b¨Ï¥Îªºconnection¡A«h·|ªğ¦^false¡D©Ò¦³³£Ãö³¬«h·|¦^¶Çtrue¡D
+	 * @returnã€€é—œé–‰æ˜¯å¦æˆåŠŸï¼Œå¦‚æœæœ‰é‚„åœ¨ä½¿ç”¨çš„connectionï¼Œå‰‡æœƒè¿”å›falseï¼æ‰€æœ‰éƒ½é—œé–‰å‰‡æœƒå›å‚³trueï¼
 	 */
 	public static synchronized boolean close() {
 		if (usingConn.size() > 0)

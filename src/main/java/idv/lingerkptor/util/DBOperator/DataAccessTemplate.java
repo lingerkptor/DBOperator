@@ -11,7 +11,7 @@ public class DataAccessTemplate {
 	private ResultSet rs = null;
 	private Connection conn = null;
 /**
- *  ³s±µ¸ê®Æ®w
+ *  é€£æ¥è³‡æ–™åº«
  */
 	private void doConnect() {
 		this.conn = ConnectPool.getConnection();
@@ -20,16 +20,16 @@ public class DataAccessTemplate {
 				Thread.sleep(1000);
 				conn = ConnectPool.getConnection();
 			} catch (InterruptedException e) {
-				throw new DataAccessException("Connection ³Q¥eº¡,½Ğ­«·sµo°e¬d¸ß");
+				throw new DataAccessException("Connection è¢«å æ»¿,è«‹é‡æ–°ç™¼é€æŸ¥è©¢");
 			}
 		}
 	}
 
 	/**
-	 * °õ¦æ¬d¸ß
+	 * åŸ·è¡ŒæŸ¥è©¢
 	 * 
-	 * @param prepared SQL¹ê§@
-	 * @param handler  ¬d¸ßµ²ªG³v¦æ¦p¦ó³B²z
+	 * @param prepared SQLå¯¦ä½œ
+	 * @param handler  æŸ¥è©¢çµæœé€è¡Œå¦‚ä½•è™•ç†
 	 * @throws DataAccessException
 	 */
 	public void query(PreparedStatementCreator prepared, RowCallbackHandler handler) throws DataAccessException {
@@ -44,18 +44,18 @@ public class DataAccessTemplate {
 			}
 			rs.close();
 		} catch (SQLException e) {
-			throw new DataAccessException("QueryTemplate ¤¤ªºSQLExeption" + e.getMessage());
+			throw new DataAccessException("QueryTemplate ä¸­çš„SQLExeption" + e.getMessage());
 
 		} finally {
-			//ÂkÁÙconnect
+			//æ­¸é‚„connect
 			ConnectPool.returnConnection(conn);
 		}
 
 	}
 
 	/**
-	 * °õ¦æCreate¡Bupdate¡BDelete 
-	 * @param prepared SQL¹ê§@
+	 * åŸ·è¡ŒCreateã€updateã€Delete 
+	 * @param prepared SQLå¯¦ä½œ
 	 * @throws DataAccessException
 	 */
 	public void update(PreparedStatementCreator prepared) throws DataAccessException {
@@ -66,10 +66,10 @@ public class DataAccessTemplate {
 			stat.executeBatch();
 			conn.commit();
 		} catch (SQLException e) {
-			throw new DataAccessException("QueryTemplate ¤¤ªºSQLExeption" + e.getMessage());
+			throw new DataAccessException("QueryTemplate ä¸­çš„SQLExeption" + e.getMessage());
 
 		} finally {
-			//ÂkÁÙconnect
+			//æ­¸é‚„connect
 			ConnectPool.returnConnection(conn);
 		}
 	}

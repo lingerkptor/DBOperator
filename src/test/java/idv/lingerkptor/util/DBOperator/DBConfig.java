@@ -29,7 +29,7 @@ public class DBConfig implements DatabaseConfig {
 			this.url = this.dbprops.getProperty("url");
 			this.maxConnection = Integer.parseInt(this.dbprops.getProperty("maxConnection"));
 		} catch (FileNotFoundException e) {
-			System.err.println("¨S§ä¨ìÀÉ®×");
+			System.err.println("æ²’æ‰¾åˆ°æª”æ¡ˆ");
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();

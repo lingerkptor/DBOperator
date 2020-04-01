@@ -68,7 +68,7 @@ public class Database {
 	public String getDriverUrl() {
 		return driverUrl;
 	}
-	// °ÊºA¸ü¤JDriver
+	// å‹•æ…‹è¼‰å…¥Driver
 	public Connection conecting() {
 		Connection conn = null;
 		try {
