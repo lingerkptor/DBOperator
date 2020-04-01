@@ -1,10 +1,17 @@
 package idv.lingerkptor.util.DBOperator;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.DriverPropertyInfo;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 public class Database {
 
@@ -61,5 +68,71 @@ public class Database {
 	public String getDriverUrl() {
 		return driverUrl;
 	}
+	// °ÊºA¸ü¤JDriver
+	public Connection conecting() {
+		Connection conn = null;
+		try {
+			URLClassLoader ucl = new URLClassLoader(
+					new URL[] { new URL("jar:file:" + this.getDriverUrl() + " !/ ") });
+			Driver d = (Driver) Class.forName(db.getDriver(), true, ucl).getDeclaredConstructor().newInstance();
+			DriverManager.registerDriver(new Driver() {
+				@Override
+				public Connection connect(String url, Properties info) throws SQLException {
+					return d.connect(url, info);
+				}
 
+				@Override
+				public boolean acceptsURL(String url) throws SQLException {
+					return d.acceptsURL(url);
+				}
+
+				@Override
+				public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException {
+
+					return d.getPropertyInfo(url, info);
+				}
+
+				@Override
+				public int getMajorVersion() {
+					return d.getMajorVersion();
+				}
+
+				@Override
+				public int getMinorVersion() {
+					return d.getMinorVersion();
+				}
+
+				@Override
+				public boolean jdbcCompliant() {
+					return d.jdbcCompliant();
+				}
+
+				@Override
+				public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+					return d.getParentLogger();
+				}
+			});
+
+			conn = DriverManager.getConnection(this.getUrl(), this.getAccount(), this.getPassword());
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		return conn;
+	}
 }
