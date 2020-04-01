@@ -83,25 +83,25 @@ public class DBConfig implements DatabaseConfig {
 
 ### STEP2  連接資料庫
 
-```
-        // DB設定檔建立
-		DatabaseConfig config = new DBConfig();
-		// 將設定檔餵給DB，如果沒有餵，在ConnectPool內會拋出Exception 
-		Database.setDatabaseConfig(config);
-		try {
-			ConnectPool.setDatabase(Database.getDatabase());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		conn = ConnectPool.getConnection();
-		Assert.assertNotNull(conn);
-		ConnectPool.returnConnection(conn);
+```java
+ // DB設定檔建立
+DatabaseConfig config = new DBConfig();
+// 將設定檔餵給DB，如果沒有餵，在ConnectPool內會拋出Exception 
+Database.setDatabaseConfig(config);
+try {
+	ConnectPool.setDatabase(Database.getDatabase());
+} catch (Exception e) {
+	e.printStackTrace();
+}
+conn = ConnectPool.getConnection();
+Assert.assertNotNull(conn);
+ConnectPool.returnConnection(conn);
 ```
 
 ### STEP3  查詢
 實作PreparedStatementCreator 介面
 
-```
+```java
 package idv.lingerkptor.util.DBOperator;
 
 import java.sql.Connection;
@@ -129,7 +129,7 @@ public class QueryDataSQL implements PreparedStatementCreator {
 ```
 實作RowCallbackHandler 介面
 
-```
+```java
 package idv.lingerkptor.util.DBOperator;
 
 import java.sql.ResultSet;
@@ -172,7 +172,7 @@ public class QueryDataResult implements RowCallbackHandler {
 
 在您想使用這兩個類別的地方
 
-```
+```java
 DataAccessTemplate template = new DataAccessTemplate();
 // 查詢用的語句
 QueryDataSQL queryData = new QueryDataSQL();
