@@ -10,9 +10,10 @@ public class DataAccessTemplate {
 	private PreparedStatement stat = null;
 	private ResultSet rs = null;
 	private Connection conn = null;
-/**
- *  連接資料庫
- */
+
+	/**
+	 * 連接資料庫
+	 */
 	private void doConnect() {
 		this.conn = ConnectPool.getConnection();
 		while (conn == null) {
@@ -34,10 +35,9 @@ public class DataAccessTemplate {
 	 */
 	public void query(PreparedStatementCreator prepared, RowCallbackHandler handler) throws DataAccessException {
 		this.doConnect();
-
-		stat = prepared.createPreparedStatement(conn);
 		try {
-			conn.setAutoCommit(false);
+			conn.setAutoCommit(true);
+			stat = prepared.createPreparedStatement(conn);
 			rs = stat.executeQuery();
 			while (rs.next()) {
 				handler.processRow(rs);
@@ -47,29 +47,34 @@ public class DataAccessTemplate {
 			throw new DataAccessException("QueryTemplate 中的SQLExeption" + e.getMessage());
 
 		} finally {
-			//歸還connect
+			// 歸還connect
 			ConnectPool.returnConnection(conn);
 		}
 
 	}
 
 	/**
-	 * 執行Create、update、Delete 
+	 * 執行Create、update、Delete
+	 * 
 	 * @param prepared SQL實作
 	 * @throws DataAccessException
 	 */
 	public void update(PreparedStatementCreator prepared) throws DataAccessException {
 		this.doConnect();
-		stat = prepared.createPreparedStatement(conn);
 		try {
 			conn.setAutoCommit(false);
+			stat = prepared.createPreparedStatement(conn);
 			stat.executeBatch();
 			conn.commit();
 		} catch (SQLException e) {
-			throw new DataAccessException("QueryTemplate 中的SQLExeption" + e.getMessage());
-
+			System.out.println("SQLException " + e.getMessage());
+			try {
+				conn.rollback();
+			} catch (SQLException e1) {
+				throw new DataAccessException("QueryTemplate 中rollback fail " + e.getMessage());
+			}
 		} finally {
-			//歸還connect
+			// 歸還connect
 			ConnectPool.returnConnection(conn);
 		}
 	}

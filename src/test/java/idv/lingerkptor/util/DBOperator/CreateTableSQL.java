@@ -8,7 +8,7 @@ public class CreateTableSQL implements PreparedStatementCreator {
 
 	@Override
 	public PreparedStatement createPreparedStatement(Connection conn) {
-		String SQL = "Create Table Test ( test text private Key, inttest Integer);";
+		String SQL = "Create Table Test ( test char(20) PRIMARY KEY, inttest Integer);";
 		try {
 			PreparedStatement prps = conn.prepareStatement(SQL);
 			prps.addBatch();

@@ -31,7 +31,9 @@ public class QueryDataResult implements RowCallbackHandler {
 					return false;
 				}
 			}
+			return true;
 		}
-		return true;
+		return false;
+		
 	}
 }
