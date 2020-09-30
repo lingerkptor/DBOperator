@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>DBOperator</groupId>
   <artifactId>DBOperator</artifactId>
-  <version>0.0.1-Release</version>
+  <version>0.1.0-Release</version>
   
   <dependencies>
     <dependency>
