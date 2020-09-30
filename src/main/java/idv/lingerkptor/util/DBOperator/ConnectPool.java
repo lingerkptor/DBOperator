@@ -72,10 +72,11 @@ public class ConnectPool {
 			try {
 				pool.get(0).close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+				throw new  DataAccessException("connection closing error.");
 			}
 			pool.remove(0);
 		}
 		return true;
 	}
+
 }
