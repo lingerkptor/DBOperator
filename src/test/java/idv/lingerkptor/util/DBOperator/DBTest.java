@@ -136,8 +136,15 @@ public class DBTest {
 
 	@Test
 	public void k_closeDB() {
-		boolean close = ConnectPool.close();
-		Assert.assertEquals("資料庫未關閉", true, close);
+		synchronized (this) {
+			ConnectPool.close();
+			try {
+				this.wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		Assert.assertEquals(ConnectPool.STATE.CLOSED, ConnectPool.getState());
 
 	}
 }

@@ -7,4 +7,5 @@ public interface DatabaseConfig {
 	public String getAccount();
 	public String getPassword();
 	public int getMaxConnection();
+	
 }

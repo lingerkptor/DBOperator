@@ -16,3 +16,6 @@ test.db
 
 # Ignore Gradle build output directory
 build
+
+# Ignore Maven build out directory
+target
