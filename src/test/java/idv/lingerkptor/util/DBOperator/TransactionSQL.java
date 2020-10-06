@@ -22,7 +22,7 @@ public class TransactionSQL implements PreparedStatementCreator {
 			preps.addBatch();
 			rs = preps.executeQuery();
 			if (rs == null) {
-				throw new DataAccessException("ResqltSet is Null ");
+				throw new DataAccessException("ResultSet is Null ");
 			}
 			int count = rs.getInt(1);
 			rs.close();

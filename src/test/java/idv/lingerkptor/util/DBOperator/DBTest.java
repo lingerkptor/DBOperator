@@ -105,7 +105,6 @@ public class DBTest {
 		Assert.assertEquals("資料量不一致", true, checkData.checkSize());
 		Assert.assertEquals("資料內容不一致", true, checkData.checkData());
 
-		// TransactionSQL transaction2 = new TransactionSQL();
 		transaction.goal("test11", 666);
 		transaction.addTwo("test22", 777);
 		template.update(transaction);
@@ -119,6 +118,12 @@ public class DBTest {
 		Assert.assertEquals("資料量不一致", true, checkData2.checkSize());
 		Assert.assertEquals("資料內容不一致", true, checkData2.checkData());
 
+		/* 
+		 * 下面測試交易失敗結果
+		 * 當更新後發現已經有test22的資料，但是test22是primary key無法再新增，整筆交易會失敗．
+		 * 所以test123並不會寫入資料庫，在測試中會有SQL Exception 內容是Primary key Constraint error．
+		 * 
+		 * */
 		transaction.goal("test123", 012);
 		transaction.addTwo("test22", 888);
 		template.update(transaction);
@@ -136,14 +141,7 @@ public class DBTest {
 
 	@Test
 	public void k_closeDB() {
-		synchronized (this) {
-			ConnectPool.close();
-			try {
-				this.wait();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
+		ConnectPool.close();
 		Assert.assertEquals(ConnectPool.STATE.CLOSED, ConnectPool.getState());
 
 	}

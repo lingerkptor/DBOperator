@@ -31,9 +31,8 @@ public class DataAccessTemplate {
 	 * 
 	 * @param prepared SQL實作
 	 * @param handler  查詢結果逐行如何處理
-	 * @throws DataAccessException
 	 */
-	public void query(PreparedStatementCreator prepared, RowCallbackHandler handler) throws DataAccessException {
+	public void query(PreparedStatementCreator prepared, RowCallbackHandler handler) {
 		this.doConnect();
 		try {
 			conn.setAutoCommit(true);
@@ -45,8 +44,9 @@ public class DataAccessTemplate {
 			rs.close();
 		} catch (SQLException e) {
 			throw new DataAccessException("QueryTemplate 中的SQLExeption" + e.getMessage());
-
 		} finally {
+			System.out.println("歸還connect");
+			System.err.println("歸還connect");
 			// 歸還connect
 			ConnectPool.returnConnection(conn);
 		}
@@ -57,9 +57,8 @@ public class DataAccessTemplate {
 	 * 執行Create、update、Delete
 	 * 
 	 * @param prepared SQL實作
-	 * @throws DataAccessException
 	 */
-	public void update(PreparedStatementCreator prepared) throws DataAccessException {
+	public void update(PreparedStatementCreator prepared)  {
 		this.doConnect();
 		try {
 			conn.setAutoCommit(false);
@@ -68,12 +67,15 @@ public class DataAccessTemplate {
 			conn.commit();
 		} catch (SQLException e) {
 			System.out.println("SQLException " + e.getMessage());
+			System.err.println("SQLException " + e.getMessage());
 			try {
 				conn.rollback();
 			} catch (SQLException e1) {
-				throw new DataAccessException("QueryTemplate 中rollback fail " + e.getMessage());
+				throw new DataAccessException("QueryTemplate 中rollback fail " + e1.getMessage());
 			}
 		} finally {
+			System.out.println("歸還connect");
+			System.err.println("歸還connect");
 			// 歸還connect
 			ConnectPool.returnConnection(conn);
 		}

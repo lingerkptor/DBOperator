@@ -144,7 +144,6 @@ public class ConnectPool {
 		synchronized (usingConnWaiting) {
 			try {
 				usingConnWaiting.wait();
-
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -159,7 +158,7 @@ public class ConnectPool {
 				pool.remove(0);
 			}
 		}
-
+		state = STATE.CLOSED;
 	}
 
 }
