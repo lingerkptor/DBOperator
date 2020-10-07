@@ -2,190 +2,89 @@
 
 ## 教學 
 ### STEP1 實作DatabaseConfig 介面
+ 請參考 /src/test/java/idv/lingekrptor/util/DBOperator/DBConfig.java 作為範例
  
- ```java
- 
- /**
-  Example implements DatabaseConfig
- **/
- 
- package idv.lingerkptor.util.DBOperator;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Properties;
-
-public class DBConfig implements DatabaseConfig {
-	private Properties dbprops;
-	private String driver;
-	private String driverUrl;
-	private String url;
-	private String account;
-	private String password;
-	private int maxConnection;
-
-	public DBConfig() {
-		File propsfile = new File("./config/db.properties");
-		if (!propsfile.exists())
-			propsfile = new File("./config/db.default.properties");
-		dbprops = new Properties();
-		try {
-			this.dbprops.load(new FileInputStream(propsfile));
-			this.account = dbprops.getProperty("account");
-			this.driver = this.dbprops.getProperty("driver");
-			this.driverUrl = this.dbprops.getProperty("driverUrl");
-			this.password = this.dbprops.getProperty("password");
-			this.url = this.dbprops.getProperty("url");
-			this.maxConnection = Integer.parseInt(this.dbprops.getProperty("maxConnection"));
-		} catch (FileNotFoundException e) {
-			System.err.println("沒找到檔案");
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-	public String getDriver() {
-		return driver;
-	}
-
-	@Override
-	public String getDriverUrl() {
-		return driverUrl;
-	}
-
-	@Override
-	public String getUrl() {
-		return url;
-	}
-
-	@Override
-	public String getAccount() {
-		return account;
-	}
-
-	@Override
-	public String getPassword() {
-		return password;
-	}
-
-	@Override
-	public int getMaxConnection() {
-		return maxConnection;
-	}
-
-}
- 
- ```
-
 ### STEP2  連接資料庫
-
 ```java
- // DB設定檔建立
+// DB設定檔建立
 DatabaseConfig config = new DBConfig();
-// 將設定檔餵給DB，如果沒有餵，在ConnectPool內會拋出Exception 
+// 交付設定檔
 Database.setDatabaseConfig(config);
 try {
+	/**
+	 * 如果資料庫已關閉，執行這下一行會可回復<br/>
+	 * 如果沒有餵設定檔，在ConnectPool內會拋出DBOperatorException
+	 */
 	ConnectPool.setDatabase(Database.getDatabase());
-} catch (Exception e) {
+} catch (DBOperatorException e) {
+	switch (e.getState()) {
+	case CONFIGISNULL:
+		// 設定檔沒有餵該怎樣處理
+	default:
+		break;
+	}
 	e.printStackTrace();
 }
-conn = ConnectPool.getConnection();
-Assert.assertNotNull(conn);
-ConnectPool.returnConnection(conn);
-```
-
-### STEP3  查詢
-實作PreparedStatementCreator 介面
-
-```java
-package idv.lingerkptor.util.DBOperator;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
-public class QueryDataSQL implements PreparedStatementCreator {
-
-	@Override
-	public PreparedStatement createPreparedStatement(Connection conn) {
-		String SQL = "select * from test ;";
-		PreparedStatement preps = null;
-		try {
-			preps = conn.prepareStatement(SQL);
-			preps.addBatch();
-			return preps;
-		} catch (SQLException e) {
-			throw new DataAccessException("SQL Exception in QueryDataSQL Class. \n" + e.getMessage());
-		}
-
+/**
+ * ConnectPool中如果connect目前都在使用中，會跳出DBOperatorException
+ */
+Connection conn = null;
+try {
+	conn = ConnectPool.getConnection();
+} catch (DBOperatorException e) {
+	/**
+	 * 請查看錯誤碼及訊息,
+	 */
+	switch (e.getState()) {
+	// ConnectPool關閉中
+	case CLOSING:
+		break;
+	// 尚未給定資料庫
+	case UNREADY:
+		break;
+	// ConnectPool已關閉
+	case CLOSED:
+		break;
+	// Connection已滿
+	case CONNECTFULL:
+		break;
+	default:
+		break;
 	}
-
+	e.printStackTrace();
 }
-
 ```
-實作RowCallbackHandler 介面
+
+### STEP3  實作PreparedStatementCreator 介面
+詳細的使用可參考/src/test/java/idv/lingekrptor/util/DBOperator/DBTest這個類別，有新增、修改、查詢、刪除範例．
+
+### STEP4  實作RowCallbackHandler 介面 
+這個介面基本上只有查詢的時候才會使用，用來處理單一row資料處理
+可以參考 /src/test/java/idv/lingekrptor/util/DBOperator/QueryDataResult.java
+
+### STEP5 關閉資料庫
 
 ```java
-package idv.lingerkptor.util.DBOperator;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-
-public class QueryDataResult implements RowCallbackHandler {
-
-	private Map<String, Integer> checkData = new HashMap<String, Integer>();
-	private Map<String, Integer> result = new HashMap<String, Integer>();
-
-	public void  addCheckData(String col,int col2) {
-		checkData.put(col, col2);
+try {
+	ConnectPool.close();
+} catch (DBOperatorException e) {
+	switch (e.getState()) {
+	// ConnectPool關閉中
+	case CLOSING:
+		break;
+	// 尚未給定資料庫
+	case UNREADY:
+		break;
+	// ConnectPool已關閉
+	case CLOSED:
+		break;
+	default:
+		break;
 	}
-
-	@Override
-	public void processRow(ResultSet rs) throws SQLException {
-		result.put(rs.getString(1), rs.getInt(2));
-	}
-
-	public boolean checkSize() {
-		return checkData.size() == result.size();
-		
-	}
-
-	public boolean checkData() {
-		if (checkData.size() == result.size()) {
-			for (String pk : checkData.keySet()) {
-				if (!result.keySet().contains(pk) || !result.get(pk).equals(checkData.get(pk))) {
-					return false;
-				}
-			}
-		}
-		return true;
-	}
+	e.printStackTrace();
 }
-
 ```
-
-在您想使用這兩個類別的地方
-
-```java
-DataAccessTemplate template = new DataAccessTemplate();
-// 查詢用的語句
-QueryDataSQL queryData = new QueryDataSQL();
-//查詢的結果處理
-QueryDataResult checkData = new QueryDataResult();
-
-checkData.addCheckData("test", 555);
-checkData.addCheckData("test2", 666);
-// 執行查詢
-template.query(queryData, checkData);
-```
-
-詳細的使用可參考idv.lingerkptor.util.DBOperator.DBTest這個類別，有新增、修改、查詢、刪除範例．
 
 
 練習Git 裡面的記錄，如果有相同的message，代表同時更改，但是忘記下指令(通常是git add (修改的檔案或新增的檔案))
+

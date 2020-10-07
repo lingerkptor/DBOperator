@@ -13,6 +13,14 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+import idv.lingerkptor.util.DBOperator.DBOperatorException.CODE;
+
+/**
+ * 資料庫
+ * 
+ * @author lingerkptor
+ *
+ */
 public class Database {
 
 	private static DatabaseConfig config = null;
@@ -37,43 +45,43 @@ public class Database {
 		Database.config = config;
 	}
 
-	public static Database getDatabase() throws Exception {
+	public static Database getDatabase() throws DBOperatorException {
 		if (config == null)
-			throw new Exception("Database Config not Configure.");
+			throw new DBOperatorException("Database Config not Configure.", CODE.CONFIGISNULL);
 		if (db == null)
 			db = new Database();
 		return db;
 	}
 
-	public String getDriver() {
+	String getDriver() {
 		return driver;
 	}
 
-	public String getUrl() {
+	String getUrl() {
 		return url;
 	}
 
-	public String getAccount() {
+	String getAccount() {
 		return account;
 	}
 
-	public String getPassword() {
+	String getPassword() {
 		return password;
 	}
 
-	public int getMaxConnection() {
+	int getMaxConnection() {
 		return maxConnection;
 	}
 
-	public String getDriverUrl() {
+	String getDriverUrl() {
 		return driverUrl;
 	}
+
 	// 動態載入Driver
 	public Connection conecting() {
 		Connection conn = null;
 		try {
-			URLClassLoader ucl = new URLClassLoader(
-					new URL[] { new URL("jar:file:" + this.getDriverUrl() + " !/ ") });
+			URLClassLoader ucl = new URLClassLoader(new URL[] { new URL("jar:file:" + this.getDriverUrl() + " !/ ") });
 			Driver d = (Driver) Class.forName(db.getDriver(), true, ucl).getDeclaredConstructor().newInstance();
 			DriverManager.registerDriver(new Driver() {
 				@Override
@@ -112,7 +120,6 @@ public class Database {
 					return d.getParentLogger();
 				}
 			});
-
 			conn = DriverManager.getConnection(this.getUrl(), this.getAccount(), this.getPassword());
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();

@@ -3,6 +3,7 @@ package idv.lingerkptor.util.DBOperator;
 import static org.junit.Assert.*;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
@@ -14,29 +15,74 @@ public class DBTest {
 
 	private DataAccessTemplate template = new DataAccessTemplate();
 
+	/**
+	 * 連接資料庫 如果資料庫已關閉，重複以下動作可重新啟用
+	 */
 	@Test
 	public void a_connectDB() {
-		Connection conn = null;
-		// DB設定檔建立
-		DatabaseConfig config = new DBConfig();
-		// 將設定檔餵給DB，如果沒有餵，在ConnectPool內會拋出Exception
-		Database.setDatabaseConfig(config);
-		try {
-			ConnectPool.setDatabase(Database.getDatabase());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		conn = ConnectPool.getConnection();
+// DB設定檔建立
+DatabaseConfig config = new DBConfig();
+// 交付設定檔
+Database.setDatabaseConfig(config);
+try {
+	/**
+	 * 如果資料庫已關閉，執行這下一行會可回復<br/>
+	 * 如果沒有餵設定檔，在ConnectPool內會拋出DBOperatorException
+	 */
+	ConnectPool.setDatabase(Database.getDatabase());
+} catch (DBOperatorException e) {
+	switch (e.getState()) {
+	case CONFIGISNULL:
+		// 設定檔沒有餵該怎樣處理
+	default:
+		break;
+	}
+	e.printStackTrace();
+}
+/**
+ * ConnectPool中如果connect目前都在使用中，會跳出DBOperatorException
+ */
+Connection conn = null;
+try {
+	conn = ConnectPool.getConnection();
+} catch (DBOperatorException e) {
+	/**
+	 * 請查看錯誤碼及訊息,
+	 */
+	switch (e.getState()) {
+	// ConnectPool關閉中
+	case CLOSING:
+		break;
+	// 尚未給定資料庫
+	case UNREADY:
+		break;
+	// ConnectPool已關閉
+	case CLOSED:
+		break;
+	// Connection已滿
+	case CONNECTFULL:
+		break;
+	default:
+		break;
+	}
+	e.printStackTrace();
+}
 		Assert.assertNotNull(conn);
 		ConnectPool.returnConnection(conn);
 	}
 
+	/**
+	 * 新增資料表
+	 */
 	@Test
 	public void b_createTable() {
 		PreparedStatementCreator createtable = new CreateTableSQL();
 		template.update(createtable);
 	}
 
+	/**
+	 * 新增兩筆資料
+	 */
 	@Test
 	public void c_addData() {
 		AddDataSQL addData = new AddDataSQL();
@@ -45,6 +91,9 @@ public class DBTest {
 		template.update(addData);
 	}
 
+	/**
+	 * 查詢結果新增結果 *
+	 */
 	@Test
 	public void d_queryData() {
 		QueryDataSQL queryData = new QueryDataSQL();
@@ -56,6 +105,9 @@ public class DBTest {
 		Assert.assertEquals("資料內容不一致", true, checkData.checkData());
 	}
 
+	/**
+	 * 更新資料
+	 */
 	@Test
 	public void e_updateData() {
 		UpdateDataSQL updateData = new UpdateDataSQL();
@@ -63,6 +115,9 @@ public class DBTest {
 		template.update(updateData);
 	}
 
+	/**
+	 * 查詢資料是否更新
+	 */
 	@Test
 	public void f_queryData() {
 		QueryDataSQL queryData = new QueryDataSQL();
@@ -74,6 +129,9 @@ public class DBTest {
 		Assert.assertEquals("資料內容不一致", true, checkData.checkData());
 	}
 
+	/**
+	 * 刪除資料
+	 */
 	@Test
 	public void g_deleteData() {
 		DeleteDataSQL deleteData = new DeleteDataSQL();
@@ -81,6 +139,9 @@ public class DBTest {
 		template.update(deleteData);
 	}
 
+	/**
+	 * 查詢資料是否刪除
+	 */
 	@Test
 	public void h_queryData() {
 		QueryDataSQL queryData = new QueryDataSQL();
@@ -91,6 +152,9 @@ public class DBTest {
 		Assert.assertEquals("資料內容不一致", true, checkData.checkData());
 	}
 
+	/**
+	 * 交易案例
+	 */
 	@Test
 	public void i_TransactionTable() {
 		TransactionSQL transaction = new TransactionSQL();
@@ -118,12 +182,11 @@ public class DBTest {
 		Assert.assertEquals("資料量不一致", true, checkData2.checkSize());
 		Assert.assertEquals("資料內容不一致", true, checkData2.checkData());
 
-		/* 
-		 * 下面測試交易失敗結果
-		 * 當更新後發現已經有test22的資料，但是test22是primary key無法再新增，整筆交易會失敗．
+		/*
+		 * 下面測試交易失敗結果 當更新後發現已經有test22的資料，但是test22是primary key無法再新增，整筆交易會失敗．
 		 * 所以test123並不會寫入資料庫，在測試中會有SQL Exception 內容是Primary key Constraint error．
 		 * 
-		 * */
+		 */
 		transaction.goal("test123", 012);
 		transaction.addTwo("test22", 888);
 		template.update(transaction);
@@ -133,16 +196,40 @@ public class DBTest {
 		Assert.assertEquals("資料內容不一致", true, checkData2.checkData());
 	}
 
+	/**
+	 * 刪除資料表
+	 */
 	@Test
 	public void j_dropTable() {
 		PreparedStatementCreator droptable = new DropTableSQL();
 		template.update(droptable);
 	}
 
+	/**
+	 * 關閉資料庫
+	 */
 	@Test
 	public void k_closeDB() {
-		ConnectPool.close();
-		Assert.assertEquals(ConnectPool.STATE.CLOSED, ConnectPool.getState());
+		try {
+			ConnectPool.close();
+		} catch (DBOperatorException e) {
+			switch (e.getState()) {
+			// ConnectPool關閉中
+			case CLOSING:
+				break;
+			// 尚未給定資料庫
+			case UNREADY:
+				break;
+			// ConnectPool已關閉
+			case CLOSED:
+				break;
+			default:
+				break;
 
+			}
+			e.printStackTrace();
+		}
+		Assert.assertEquals(ConnectPool.STATE.CLOSED, ConnectPool.getState());
 	}
+
 }

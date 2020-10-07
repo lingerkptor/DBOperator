@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-
 public class TransactionSQL implements PreparedStatementCreator {
 
 	private String goal, two;
@@ -21,9 +20,6 @@ public class TransactionSQL implements PreparedStatementCreator {
 			preps.setString(1, goal);
 			preps.addBatch();
 			rs = preps.executeQuery();
-			if (rs == null) {
-				throw new DataAccessException("ResultSet is Null ");
-			}
 			int count = rs.getInt(1);
 			rs.close();
 			if (count > 0) {
@@ -41,11 +37,11 @@ public class TransactionSQL implements PreparedStatementCreator {
 				preps.setInt(2, value1);
 			}
 			preps.addBatch();
-			return preps;
-		} catch (SQLException e) {
-			throw new DataAccessException("SQL Exception in TransactionSQL Class." + e.getMessage());
-		}
 
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return preps;
 	}
 
 	public void goal(String goal, int inttest) {

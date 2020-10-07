@@ -24,11 +24,10 @@ public class UpdateDataSQL implements PreparedStatementCreator {
 				}
 			}
 
-			return preps;
 		} catch (SQLException e) {
-			throw new DataAccessException("SQL Exception in UpdateDataSQL Class." + e.getMessage());
-
+			e.printStackTrace();
 		}
+		return preps;
 	}
 
 	public void addData(String string, int i) {

@@ -13,11 +13,11 @@ public class QueryDataSQL implements PreparedStatementCreator {
 		try {
 			preps = conn.prepareStatement(SQL);
 			preps.addBatch();
-			return preps;
-		} catch (SQLException e) {
-			throw new DataAccessException("SQL Exception in QueryDataSQL Class. \n" + e.getMessage());
-		}
 
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return preps;
 	}
 
 }

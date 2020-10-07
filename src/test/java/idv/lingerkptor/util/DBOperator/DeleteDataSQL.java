@@ -3,13 +3,15 @@ package idv.lingerkptor.util.DBOperator;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-
+/**
+ * 刪除資料
+ * @author lingerkptor
+ *
+ */
 public class DeleteDataSQL implements PreparedStatementCreator {
-	Set<String>keys = new HashSet<String>();
+	Set<String> keys = new HashSet<String>();
 
 	@Override
 	public PreparedStatement createPreparedStatement(Connection conn) {
@@ -24,12 +26,10 @@ public class DeleteDataSQL implements PreparedStatementCreator {
 					preps.addBatch();
 				}
 			}
-
-			return preps;
 		} catch (SQLException e) {
-			throw new DataAccessException("SQL Exception in DeleteDataSQL Class." + e.getMessage());
-
+			e.printStackTrace();
 		}
+		return preps;
 	}
 
 	public void addData(String key) {

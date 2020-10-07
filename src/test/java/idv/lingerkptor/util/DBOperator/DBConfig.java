@@ -5,7 +5,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
-
+/**
+ * 實作設定
+ * @author lingerkptor
+ *
+ */
 public class DBConfig implements DatabaseConfig {
 	private Properties dbprops;
 	private String driver;

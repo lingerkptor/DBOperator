@@ -4,6 +4,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+/**
+ * 新增資料表
+ * 
+ * @author lingerkptor
+ *
+ */
 public class CreateTableSQL implements PreparedStatementCreator {
 
 	@Override

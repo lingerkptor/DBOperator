@@ -5,7 +5,11 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-
+/**
+ * 插入資料
+ * @author lingerkptor
+ * 
+ */
 public class AddDataSQL implements PreparedStatementCreator {
 	Map<String, Integer> datas = new HashMap<String, Integer>();
 
@@ -27,12 +31,10 @@ public class AddDataSQL implements PreparedStatementCreator {
 					preps.addBatch();
 				}
 			}
-			
-			return preps;
 		} catch (SQLException e) {
-			throw new DataAccessException("SQL Exception in AddDataSQL Class." + e.getMessage());
-
+			e.printStackTrace();
 		}
+		return preps;
 	}
 
 }

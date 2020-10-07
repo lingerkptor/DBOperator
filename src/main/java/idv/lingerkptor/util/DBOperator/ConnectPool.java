@@ -9,6 +9,7 @@ import java.util.List;
  * 用來管理connection，創造、回收、釋放的類別
  * 
  * created by lingerkptor 2020/03/27
+ * 
  */
 public class ConnectPool {
 	/**
@@ -36,10 +37,30 @@ public class ConnectPool {
 		SERVICE, CLOSING, UNREADY, CLOSED
 	};
 
+	/**
+	 * 設定CooncetPool 狀態
+	 * 
+	 * @param state CooncetPool 狀態
+	 */
+	static void setState(STATE state) {
+		ConnectPool.state = state;
+	}
+
+	/**
+	 * 查詢目前CoonectPool狀態
+	 * 
+	 * @return CooncetPool 狀態
+	 */
 	public static STATE getState() {
 		return ConnectPool.state;
 	}
 
+	/**
+	 * 設定資料庫 <br/>
+	 * 如果資料庫已關閉，執行這下一行會可回復
+	 * 
+	 * @param db 資料庫
+	 */
 	public static synchronized void setDatabase(Database db) {
 		synchronized (state) {
 			ConnectPool.db = db;
@@ -54,16 +75,17 @@ public class ConnectPool {
 	 * @return 從connection pool拿connection，如果pool都拿完的時候回傳null
 	 * @throws Exception
 	 */
-	public static Connection getConnection() {
+	public static Connection getConnection() throws DBOperatorException {
 		Connection conn = null;
 		synchronized (state) {
 			switch (state) {
 			case UNREADY:
-				throw new DataAccessException("資料庫尚未給定.");
+				throw new DBOperatorException("資料庫尚未給定.", DBOperatorException.CODE.UNREADY);
 			case CLOSING:
-				throw new DataAccessException("資料庫關閉中，已不提供服務.");
+				throw new DBOperatorException("ConnectPool關閉中，已不提供服務，.", DBOperatorException.CODE.CLOSING);
 			case CLOSED:
-				throw new DataAccessException("資料庫已關閉，已不提供服務.");
+				throw new DBOperatorException("ConnectPool已關閉，已不提供服務，如果想再次使用請重新給定資料庫．.",
+						DBOperatorException.CODE.CLOSED);
 			default:
 				break;
 			}
@@ -80,7 +102,7 @@ public class ConnectPool {
 						usingConn.add(conn);
 					}
 				} else {
-					throw new DataAccessException("Connection已滿，請稍後再使用.");
+					throw new DBOperatorException("Connection已滿，請稍後再使用.", DBOperatorException.CODE.CONNECTFULL);
 				}
 			}
 		}
@@ -104,18 +126,16 @@ public class ConnectPool {
 
 	/**
 	 * 關閉pool中的所有connection <br/>
-	 * 關閉過程 getState狀態變化 <br/>
-	 * 關閉前
 	 */
-	public static void close() {
+	public static void close() throws DBOperatorException {
 		synchronized (state) {
 			switch (state) {
 			case UNREADY:// 沒有資料庫可關閉 ，直接跳出
-				return;
+				throw new DBOperatorException("沒有資料庫可關閉 ，直接跳出．", DBOperatorException.CODE.UNREADY);
 			case CLOSING:// 關閉中，避免重複執行關閉程式碼，直接跳出
-				return;
+				throw new DBOperatorException("關閉中，避免重複執行關閉程式碼，直接跳出．", DBOperatorException.CODE.CLOSING);
 			case CLOSED:// 已經關閉，直接跳出
-				return;
+				throw new DBOperatorException("已經關閉，直接跳出．", DBOperatorException.CODE.CLOSED);
 			case SERVICE: // 這行要在CLOSING之前，不然不會執行下面的程式碼
 				state = STATE.CLOSING;
 			default:
@@ -153,7 +173,7 @@ public class ConnectPool {
 				try {
 					pool.get(0).close();
 				} catch (SQLException e) {
-					throw new DataAccessException("connection closing error.");
+					e.printStackTrace();
 				}
 				pool.remove(0);
 			}

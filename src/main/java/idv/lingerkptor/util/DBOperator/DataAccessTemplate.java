@@ -15,14 +15,19 @@ public class DataAccessTemplate {
 	 * 連接資料庫
 	 */
 	private void doConnect() {
-		this.conn = ConnectPool.getConnection();
-		while (conn == null) {
-			try {
-				Thread.sleep(1000);
-				conn = ConnectPool.getConnection();
-			} catch (InterruptedException e) {
-				throw new DataAccessException("Connection 被占滿,請重新發送查詢");
+		try {
+			this.conn = ConnectPool.getConnection();
+			while (conn == null) {
+				try {
+					Thread.sleep(1000);
+					conn = ConnectPool.getConnection();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
+		} catch (DBOperatorException e) {
+
+			e.printStackTrace();
 		}
 	}
 
@@ -37,16 +42,15 @@ public class DataAccessTemplate {
 		try {
 			conn.setAutoCommit(true);
 			stat = prepared.createPreparedStatement(conn);
+
 			rs = stat.executeQuery();
 			while (rs.next()) {
 				handler.processRow(rs);
 			}
 			rs.close();
 		} catch (SQLException e) {
-			throw new DataAccessException("QueryTemplate 中的SQLExeption" + e.getMessage());
+			e.printStackTrace();
 		} finally {
-			System.out.println("歸還connect");
-			System.err.println("歸還connect");
 			// 歸還connect
 			ConnectPool.returnConnection(conn);
 		}
@@ -58,7 +62,7 @@ public class DataAccessTemplate {
 	 * 
 	 * @param prepared SQL實作
 	 */
-	public void update(PreparedStatementCreator prepared)  {
+	public void update(PreparedStatementCreator prepared) {
 		this.doConnect();
 		try {
 			conn.setAutoCommit(false);
@@ -66,16 +70,14 @@ public class DataAccessTemplate {
 			stat.executeBatch();
 			conn.commit();
 		} catch (SQLException e) {
-			System.out.println("SQLException " + e.getMessage());
-			System.err.println("SQLException " + e.getMessage());
+			e.printStackTrace();
 			try {
 				conn.rollback();
 			} catch (SQLException e1) {
-				throw new DataAccessException("QueryTemplate 中rollback fail " + e1.getMessage());
+				// rollback出錯
+				e1.printStackTrace();
 			}
 		} finally {
-			System.out.println("歸還connect");
-			System.err.println("歸還connect");
 			// 歸還connect
 			ConnectPool.returnConnection(conn);
 		}
