@@ -1,5 +1,7 @@
 package idv.lingerkptor.util.DBOperator;
 
+import idv.lingerkptor.util.DBOperator.ConnectPool.STATE;
+
 /**
  * 
  * @author lingerkptor
@@ -7,26 +9,26 @@ package idv.lingerkptor.util.DBOperator;
  *
  */
 public class DBOperatorException extends RuntimeException {
-	/**
-	 * 錯誤碼<br/>
-	 * CLOSING ： 關閉中<br/>
-	 * UNREADY ： 資料庫尚未給定 <br/>
-	 * CLOSED ： 已關閉<br/>
-	 * CONNECTFULL ： Connection 已滿<br/>
-	 * CONFIGISNULL // 資料庫沒有設定檔
-	 */
-	public enum CODE {
-		CLOSING // 關閉中
-		, UNREADY // 資料庫尚未給定
-		, CLOSED // 已關閉
-		, CONNECTFULL // Connection 已滿
-		, CONFIGISNULL // 資料庫沒有設定檔
-	};
-
+//	/**
+//	 * 錯誤碼<br/>
+//	 * CLOSING ： 關閉中<br/>
+//	 * UNREADY ： 資料庫尚未給定 <br/>
+//	 * CLOSED ： 已關閉<br/>
+//	 * CONNECTFULL ： Connection 已滿<br/>
+//	 * CONFIGISNULL // 資料庫沒有設定檔
+//	 */
+//	public enum CODE {
+//		CLOSING // 關閉中
+//		, UNREADY // 資料庫尚未給定
+//		, CLOSED // 已關閉
+//		, CONNECTFULL // Connection 已滿
+//		, CONFIGISNULL // 資料庫沒有設定檔
+//	};
+//
 	/**
 	 * 錯誤碼
 	 */
-	private CODE code;
+	private STATE code;
 	private static final long serialVersionUID = -8923279912278751216L;
 
 	/**
@@ -36,12 +38,11 @@ public class DBOperatorException extends RuntimeException {
 	 * @param code    錯誤碼
 	 */
 
-	public DBOperatorException(String message, CODE code) {
+	public DBOperatorException(String message, STATE code) {
 		super("Code"+code+" "+message);
-		this.code = code;
 	}
 
-	public CODE getState() {
+	public STATE getState() {
 		return code;
 	}
 }

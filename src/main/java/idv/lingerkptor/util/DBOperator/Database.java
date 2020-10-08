@@ -13,7 +13,7 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-import idv.lingerkptor.util.DBOperator.DBOperatorException.CODE;
+import idv.lingerkptor.util.DBOperator.ConnectPool.STATE;
 
 /**
  * 資料庫
@@ -23,16 +23,18 @@ import idv.lingerkptor.util.DBOperator.DBOperatorException.CODE;
  */
 public class Database {
 
-	private static DatabaseConfig config = null;
 	private String driver;
 	private String driverUrl;
 	private String url;
 	private String account;
 	private String password;
 	private int maxConnection;
-	private static Database db = null;
 
 	private Database() {
+
+	}
+
+	private Database(DatabaseConfig config) {
 		this.account = config.getAccount();
 		this.driver = config.getDriver();
 		this.driverUrl = config.getDriverUrl();
@@ -41,15 +43,10 @@ public class Database {
 		this.maxConnection = config.getMaxConnection();
 	}
 
-	public static void setDatabaseConfig(DatabaseConfig config) {
-		Database.config = config;
-	}
-
-	public static Database getDatabase() throws DBOperatorException {
+	public static Database getDatabase(DatabaseConfig config) throws DBOperatorException {
 		if (config == null)
-			throw new DBOperatorException("Database Config not Configure.", CODE.CONFIGISNULL);
-		if (db == null)
-			db = new Database();
+			throw new DBOperatorException("Database Config not Configure.", STATE.UNREADY);
+		Database db = new Database(config);
 		return db;
 	}
 
@@ -82,7 +79,7 @@ public class Database {
 		Connection conn = null;
 		try {
 			URLClassLoader ucl = new URLClassLoader(new URL[] { new URL("jar:file:" + this.getDriverUrl() + " !/ ") });
-			Driver d = (Driver) Class.forName(db.getDriver(), true, ucl).getDeclaredConstructor().newInstance();
+			Driver d = (Driver) Class.forName(this.getDriver(), true, ucl).getDeclaredConstructor().newInstance();
 			DriverManager.registerDriver(new Driver() {
 				@Override
 				public Connection connect(String url, Properties info) throws SQLException {

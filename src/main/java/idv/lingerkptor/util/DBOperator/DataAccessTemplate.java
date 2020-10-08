@@ -5,29 +5,43 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+
 public class DataAccessTemplate {
 
 	private PreparedStatement stat = null;
 	private ResultSet rs = null;
 	private Connection conn = null;
+	private ConnectPool pool = null;
+
+	@SuppressWarnings("unused")
+	private DataAccessTemplate() {
+	}
+
+	public DataAccessTemplate(ConnectPool pool) {
+		this.pool = pool;
+	}
 
 	/**
 	 * 連接資料庫
 	 */
 	private void doConnect() {
 		try {
-			this.conn = ConnectPool.getConnection();
-			while (conn == null) {
-				try {
-					Thread.sleep(1000);
-					conn = ConnectPool.getConnection();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
+			this.conn = pool.getConnection();
 		} catch (DBOperatorException e) {
-
-			e.printStackTrace();
+			/**
+			 * 請查看錯誤碼及訊息,
+			 */
+			switch (e.getState()) {
+			// ConnectPool關閉中
+			case CLOSING:
+			// ConnectPool已關閉
+			case CLOSED:
+			// 尚未給定資料庫
+			case UNREADY:
+			default:
+				e.printStackTrace();
+				break;
+			}
 		}
 	}
 
@@ -52,7 +66,7 @@ public class DataAccessTemplate {
 			e.printStackTrace();
 		} finally {
 			// 歸還connect
-			ConnectPool.returnConnection(conn);
+			pool.returnConnection(conn);
 		}
 
 	}
@@ -79,7 +93,7 @@ public class DataAccessTemplate {
 			}
 		} finally {
 			// 歸還connect
-			ConnectPool.returnConnection(conn);
+			pool.returnConnection(conn);
 		}
 	}
 }

@@ -8,68 +8,60 @@ import java.sql.SQLException;
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runners.MethodSorters;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DBTest {
-
-	private DataAccessTemplate template = new DataAccessTemplate();
+	private static ConnectPool pool = null;
 
 	/**
 	 * 連接資料庫 如果資料庫已關閉，重複以下動作可重新啟用
 	 */
 	@Test
 	public void a_connectDB() {
-// DB設定檔建立
-DatabaseConfig config = new DBConfig();
-// 交付設定檔
-Database.setDatabaseConfig(config);
-try {
-	/**
-	 * 如果資料庫已關閉，執行這下一行會可回復<br/>
-	 * 如果沒有餵設定檔，在ConnectPool內會拋出DBOperatorException
-	 */
-	ConnectPool.setDatabase(Database.getDatabase());
-} catch (DBOperatorException e) {
-	switch (e.getState()) {
-	case CONFIGISNULL:
-		// 設定檔沒有餵該怎樣處理
-	default:
-		break;
-	}
-	e.printStackTrace();
-}
-/**
- * ConnectPool中如果connect目前都在使用中，會跳出DBOperatorException
- */
-Connection conn = null;
-try {
-	conn = ConnectPool.getConnection();
-} catch (DBOperatorException e) {
-	/**
-	 * 請查看錯誤碼及訊息,
-	 */
-	switch (e.getState()) {
-	// ConnectPool關閉中
-	case CLOSING:
-		break;
-	// 尚未給定資料庫
-	case UNREADY:
-		break;
-	// ConnectPool已關閉
-	case CLOSED:
-		break;
-	// Connection已滿
-	case CONNECTFULL:
-		break;
-	default:
-		break;
-	}
-	e.printStackTrace();
-}
+		// DB設定檔建立
+		pool = new ConnectPool();
+		DatabaseConfig config = new DBConfig();
+		try {
+			/**
+			 * 如果資料庫已關閉，執行這下一行會可回復<br/>
+			 * 如果沒有餵設定檔，在ConnectPool內會拋出DBOperatorException
+			 */
+			pool.setDatabase(Database.getDatabase(config));
+		} catch (DBOperatorException e) {
+			switch (e.getState()) {
+			case UNREADY:
+				// 設定檔沒有餵該怎樣處理
+			default:
+				break;
+			}
+			e.printStackTrace();
+		}
+		/**
+		 * ConnectPool中如果connect目前都在使用中，會跳出DBOperatorException
+		 */
+		Connection conn = null;
+		try {
+			conn = pool.getConnection();
+		} catch (DBOperatorException e) {
+			/**
+			 * 請查看錯誤碼及訊息,
+			 */
+			switch (e.getState()) {
+			case CLOSING: // ConnectPool關閉中
+			case UNREADY: // 尚未給定資料庫
+			case CLOSED:// ConnectPool已關閉
+			default:
+				break;
+			}
+			e.printStackTrace();
+		}
 		Assert.assertNotNull(conn);
-		ConnectPool.returnConnection(conn);
+		pool.returnConnection(conn);
 	}
+
+	private DataAccessTemplate template = new DataAccessTemplate(pool);
 
 	/**
 	 * 新增資料表
@@ -182,13 +174,13 @@ try {
 		Assert.assertEquals("資料量不一致", true, checkData2.checkSize());
 		Assert.assertEquals("資料內容不一致", true, checkData2.checkData());
 
-		/*
-		 * 下面測試交易失敗結果 當更新後發現已經有test22的資料，但是test22是primary key無法再新增，整筆交易會失敗．
-		 * 所以test123並不會寫入資料庫，在測試中會有SQL Exception 內容是Primary key Constraint error．
-		 * 
-		 */
+		
 		transaction.goal("test123", 012);
 		transaction.addTwo("test22", 888);
+		/*
+		 * 下面一行測試交易失敗 當更新後發現已經有test22的資料，但是test22是primary key無法再新增，整筆交易會失敗．
+		 * 所以test123並不會寫入資料庫，在測試中會有SQL Exception 內容是Primary key Constraint error．
+		 */
 		template.update(transaction);
 
 		template.query(queryData2, checkData2);
@@ -211,7 +203,7 @@ try {
 	@Test
 	public void k_closeDB() {
 		try {
-			ConnectPool.close();
+			pool.close();
 		} catch (DBOperatorException e) {
 			switch (e.getState()) {
 			// ConnectPool關閉中
@@ -229,7 +221,7 @@ try {
 			}
 			e.printStackTrace();
 		}
-		Assert.assertEquals(ConnectPool.STATE.CLOSED, ConnectPool.getState());
+		Assert.assertEquals(ConnectPool.STATE.CLOSED, pool.getState());
 	}
 
 }

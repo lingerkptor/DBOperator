@@ -4,55 +4,14 @@
 ### STEP1 實作DatabaseConfig 介面
  請參考 /src/test/java/idv/lingekrptor/util/DBOperator/DBConfig.java 作為範例
  
-### STEP2  連接資料庫
+### STEP2  設定資料庫
 ```java
+// 建立一個連接池
+ConnectPool pool = new ConnectPool();
 // DB設定檔建立
 DatabaseConfig config = new DBConfig();
-// 交付設定檔
-Database.setDatabaseConfig(config);
-try {
-	/**
-	 * 如果資料庫已關閉，執行這下一行會可回復<br/>
-	 * 如果沒有餵設定檔，在ConnectPool內會拋出DBOperatorException
-	 */
-	ConnectPool.setDatabase(Database.getDatabase());
-} catch (DBOperatorException e) {
-	switch (e.getState()) {
-	case CONFIGISNULL:
-		// 設定檔沒有餵該怎樣處理
-	default:
-		break;
-	}
-	e.printStackTrace();
-}
-/**
- * ConnectPool中如果connect目前都在使用中，會跳出DBOperatorException
- */
-Connection conn = null;
-try {
-	conn = ConnectPool.getConnection();
-} catch (DBOperatorException e) {
-	/**
-	 * 請查看錯誤碼及訊息,
-	 */
-	switch (e.getState()) {
-	// ConnectPool關閉中
-	case CLOSING:
-		break;
-	// 尚未給定資料庫
-	case UNREADY:
-		break;
-	// ConnectPool已關閉
-	case CLOSED:
-		break;
-	// Connection已滿
-	case CONNECTFULL:
-		break;
-	default:
-		break;
-	}
-	e.printStackTrace();
-}
+// 將資料庫交付給連接池管理
+pool.setDatabase(Database.getDatabase(config));
 ```
 
 ### STEP3  實作PreparedStatementCreator 介面
@@ -71,13 +30,10 @@ try {
 	switch (e.getState()) {
 	// ConnectPool關閉中
 	case CLOSING:
-		break;
 	// 尚未給定資料庫
 	case UNREADY:
-		break;
 	// ConnectPool已關閉
 	case CLOSED:
-		break;
 	default:
 		break;
 	}
