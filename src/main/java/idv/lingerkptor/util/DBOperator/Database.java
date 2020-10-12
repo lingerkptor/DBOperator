@@ -23,17 +23,40 @@ import idv.lingerkptor.util.DBOperator.ConnectPool.STATE;
  */
 public class Database {
 
+	/**
+	 * JDBC 名稱
+	 */
 	private String driver;
+	/**
+	 * JDBC的URL位址
+	 */
 	private String driverUrl;
+	/**
+	 * 資料庫的URL位址
+	 */
 	private String url;
+	/**
+	 * 資料庫帳號
+	 */
 	private String account;
+	/**
+	 * 資料庫密碼
+	 */
 	private String password;
+	/**
+	 * 最大連線數
+	 */
 	private int maxConnection;
 
+	/**
+	 * 不給你用
+	 */
 	private Database() {
 
 	}
-
+	/**
+	 * 不給你用
+	 */
 	private Database(DatabaseConfig config) {
 		this.account = config.getAccount();
 		this.driver = config.getDriver();
@@ -43,6 +66,12 @@ public class Database {
 		this.maxConnection = config.getMaxConnection();
 	}
 
+	/**
+	 * 用config的設定，去取得資料庫
+	 * @param config
+	 * @return
+	 * @throws DBOperatorException 如果沒有給config，會拋出這個例外．
+	 */
 	public static Database getDatabase(DatabaseConfig config) throws DBOperatorException {
 		if (config == null)
 			throw new DBOperatorException("Database Config not Configure.", STATE.UNREADY);
@@ -74,7 +103,10 @@ public class Database {
 		return driverUrl;
 	}
 
-	// 動態載入Driver
+	/** 動態載入Driver
+	 * 
+	 * @return Connection 回傳可用的Connection
+	 */
 	public Connection conecting() {
 		Connection conn = null;
 		try {

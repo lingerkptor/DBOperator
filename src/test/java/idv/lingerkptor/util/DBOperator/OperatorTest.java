@@ -1,18 +1,15 @@
 package idv.lingerkptor.util.DBOperator;
 
-import static org.junit.Assert.*;
-
 import java.sql.Connection;
-import java.sql.SQLException;
 
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runners.MethodSorters;
 
+
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class DBTest {
+public class OperatorTest {
 	private static ConnectPool pool = null;
 
 	/**
@@ -217,7 +214,6 @@ public class DBTest {
 				break;
 			default:
 				break;
-
 			}
 			e.printStackTrace();
 		}

@@ -31,8 +31,8 @@ public class ConnectPool {
 	 * 服務狀態 <br/>
 	 * UNREADY =尚未給定資料庫 <br/>
 	 * SERVICE = 服務中 <br/>
-	 * CLOSING = 有資料庫資訊但正在關閉中
-	 *  CLOSED = 有資料庫資訊但已關閉
+	 * CLOSING = 有資料庫資訊但正在關閉中 <br/>
+	 * CLOSED = 有資料庫資訊但已關閉
 	 */
 	public enum STATE {
 		SERVICE, CLOSING, UNREADY, CLOSED
@@ -85,8 +85,7 @@ public class ConnectPool {
 			case CLOSING:
 				throw new DBOperatorException("ConnectPool關閉中，已不提供服務，.", STATE.CLOSING);
 			case CLOSED:
-				throw new DBOperatorException("ConnectPool已關閉，已不提供服務，如果想再次使用請重新給定資料庫．.",
-						STATE.CLOSED);
+				throw new DBOperatorException("ConnectPool已關閉，已不提供服務，如果想再次使用請重新給定資料庫．.", STATE.CLOSED);
 			default:
 				break;
 			}
@@ -121,8 +120,14 @@ public class ConnectPool {
 	public void returnConnection(Connection conn) {
 		synchronized (usingConn) {
 			usingConn.remove(conn);
-			synchronized (pool) {
-				pool.add(conn);
+			try {
+				if (!conn.isClosed()) {
+					synchronized (pool) {
+						pool.add(conn);
+					}
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
 			}
 			usingConn.notify();
 		}
@@ -130,6 +135,7 @@ public class ConnectPool {
 
 	/**
 	 * 關閉pool中的所有connection <br/>
+	 * 
 	 */
 	public void close() throws DBOperatorException {
 		synchronized (state) {
@@ -146,15 +152,15 @@ public class ConnectPool {
 				break;
 			}
 		}
-		/**
-		 * 等待使用中的Connect直到他都回到pool裡面
-		 */
 
-		while (usingConn.size() > 0) {
-			try {
-				usingConn.wait();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+		// 等待使用中的Connect直到他都回到pool裡面
+		synchronized (usingConn) {
+			while (usingConn.size() > 0) {
+				try {
+					usingConn.wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		synchronized (pool) {
@@ -167,7 +173,6 @@ public class ConnectPool {
 				pool.remove(0);
 			}
 		}
-
 		state = STATE.CLOSED;
 	}
 

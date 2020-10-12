@@ -9,27 +9,21 @@ import idv.lingerkptor.util.DBOperator.ConnectPool.STATE;
  *
  */
 public class DBOperatorException extends RuntimeException {
-//	/**
-//	 * 錯誤碼<br/>
-//	 * CLOSING ： 關閉中<br/>
-//	 * UNREADY ： 資料庫尚未給定 <br/>
-//	 * CLOSED ： 已關閉<br/>
-//	 * CONNECTFULL ： Connection 已滿<br/>
-//	 * CONFIGISNULL // 資料庫沒有設定檔
-//	 */
-//	public enum CODE {
-//		CLOSING // 關閉中
-//		, UNREADY // 資料庫尚未給定
-//		, CLOSED // 已關閉
-//		, CONNECTFULL // Connection 已滿
-//		, CONFIGISNULL // 資料庫沒有設定檔
-//	};
-//
 	/**
 	 * 錯誤碼
 	 */
 	private STATE code;
 	private static final long serialVersionUID = -8923279912278751216L;
+
+	@SuppressWarnings("unused")
+	private DBOperatorException() {
+
+	}
+
+	@SuppressWarnings("unused")
+	private DBOperatorException(String message) {
+
+	}
 
 	/**
 	 * 給定錯誤碼，讓使用者方便處理（使用switch case）
@@ -39,7 +33,7 @@ public class DBOperatorException extends RuntimeException {
 	 */
 
 	public DBOperatorException(String message, STATE code) {
-		super("Code"+code+" "+message);
+		super("Code " + code + " : " + message);
 	}
 
 	public STATE getState() {

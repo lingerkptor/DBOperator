@@ -5,44 +5,44 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-
 public class DataAccessTemplate {
 
 	private PreparedStatement stat = null;
 	private ResultSet rs = null;
-	private Connection conn = null;
 	private ConnectPool pool = null;
 
 	@SuppressWarnings("unused")
 	private DataAccessTemplate() {
 	}
 
+	/**
+	 * Constructor
+	 * @param pool 連接池
+	 */
 	public DataAccessTemplate(ConnectPool pool) {
 		this.pool = pool;
 	}
 
 	/**
-	 * 連接資料庫
+	 * 取得˙資料庫連接
 	 */
-	private void doConnect() {
+	private Connection getConnection() {
 		try {
-			this.conn = pool.getConnection();
+			return pool.getConnection();
 		} catch (DBOperatorException e) {
-			/**
-			 * 請查看錯誤碼及訊息,
-			 */
 			switch (e.getState()) {
 			// ConnectPool關閉中
 			case CLOSING:
-			// ConnectPool已關閉
+				// ConnectPool已關閉
 			case CLOSED:
-			// 尚未給定資料庫
+				// 尚未給定資料庫
 			case UNREADY:
 			default:
 				e.printStackTrace();
 				break;
 			}
 		}
+		return null;
 	}
 
 	/**
@@ -52,7 +52,8 @@ public class DataAccessTemplate {
 	 * @param handler  查詢結果逐行如何處理
 	 */
 	public void query(PreparedStatementCreator prepared, RowCallbackHandler handler) {
-		this.doConnect();
+		Connection conn = this.getConnection();
+
 		try {
 			conn.setAutoCommit(true);
 			stat = prepared.createPreparedStatement(conn);
@@ -63,12 +64,16 @@ public class DataAccessTemplate {
 			}
 			rs.close();
 		} catch (SQLException e) {
+			try {
+				conn.close();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
 			e.printStackTrace();
 		} finally {
 			// 歸還connect
 			pool.returnConnection(conn);
 		}
-
 	}
 
 	/**
@@ -77,7 +82,7 @@ public class DataAccessTemplate {
 	 * @param prepared SQL實作
 	 */
 	public void update(PreparedStatementCreator prepared) {
-		this.doConnect();
+		Connection conn = this.getConnection();
 		try {
 			conn.setAutoCommit(false);
 			stat = prepared.createPreparedStatement(conn);
