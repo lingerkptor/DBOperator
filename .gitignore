@@ -1,3 +1,9 @@
+# Ignore intellij idea file
+.idea/*
+DBOperator.iml
+
+
+
 # Ignore Gradle project-specific cache directory
 .gradle
 
