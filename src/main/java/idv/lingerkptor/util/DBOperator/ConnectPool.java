@@ -74,9 +74,10 @@ public class ConnectPool {
 	 * 取得可使用的connection
 	 * 
 	 * @return 從connection pool拿connection，如果pool都拿完的時候回傳null
+	 * @throws SQLException 
 	 * @throws Exception
 	 */
-	public Connection getConnection() throws DBOperatorException {
+	public Connection getConnection() throws DBOperatorException, SQLException {
 		Connection conn = null;
 		synchronized (state) {
 			switch (state) {

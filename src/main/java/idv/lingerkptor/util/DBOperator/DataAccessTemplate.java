@@ -41,6 +41,9 @@ public class DataAccessTemplate {
 				e.printStackTrace();
 				break;
 			}
+		} catch (SQLException e) {
+			System.out.println("連線失敗");
+			e.printStackTrace();
 		}
 		return null;
 	}

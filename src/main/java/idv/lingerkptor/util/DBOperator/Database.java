@@ -107,7 +107,7 @@ public class Database {
 	 * 
 	 * @return Connection 回傳可用的Connection
 	 */
-	public Connection conecting() {
+	public Connection conecting() throws SQLException {
 		Connection conn = null;
 		try {
 			URLClassLoader ucl = new URLClassLoader(new URL[] { new URL("jar:file:" + this.getDriverUrl() + " !/ ") });
@@ -152,9 +152,7 @@ public class Database {
 			conn = DriverManager.getConnection(this.getUrl(), this.getAccount(), this.getPassword());
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} catch (InstantiationException e) {
+		}  catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();

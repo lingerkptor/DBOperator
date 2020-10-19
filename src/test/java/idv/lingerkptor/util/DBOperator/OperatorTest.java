@@ -1,6 +1,7 @@
 package idv.lingerkptor.util.DBOperator;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
@@ -40,7 +41,11 @@ public class OperatorTest {
 		 */
 		Connection conn = null;
 		try {
-			conn = pool.getConnection();
+			try {
+				conn = pool.getConnection();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		} catch (DBOperatorException e) {
 			/**
 			 * 請查看錯誤碼及訊息,
