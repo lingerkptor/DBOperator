@@ -15,12 +15,8 @@ public class QueryDataResult implements RowCallbackHandler {
 	}
 
 	@Override
-	public void processRow(ResultSet rs){
-		try {
+	public void processRow(ResultSet rs) throws SQLException{
 			result.put(rs.getString(1), rs.getInt(2));
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
 	}
 
 	public boolean checkSize() {

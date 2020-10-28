@@ -8,7 +8,6 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
-
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class OperatorTest {
 	private static ConnectPool pool = null;
@@ -71,7 +70,11 @@ public class OperatorTest {
 	@Test
 	public void b_createTable() {
 		PreparedStatementCreator createtable = new CreateTableSQL();
-		template.update(createtable);
+		try {
+			template.update(createtable);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -82,7 +85,11 @@ public class OperatorTest {
 		AddDataSQL addData = new AddDataSQL();
 		addData.addData("test", 555);
 		addData.addData("test2", 666);
-		template.update(addData);
+		try {
+			template.update(addData);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -94,7 +101,11 @@ public class OperatorTest {
 		QueryDataResult checkData = new QueryDataResult();
 		checkData.addCheckData("test", 555);
 		checkData.addCheckData("test2", 666);
-		template.query(queryData, checkData);
+		try {
+			template.query(queryData, checkData);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		Assert.assertEquals("資料量不一致", true, checkData.checkSize());
 		Assert.assertEquals("資料內容不一致", true, checkData.checkData());
 	}
@@ -106,7 +117,11 @@ public class OperatorTest {
 	public void e_updateData() {
 		UpdateDataSQL updateData = new UpdateDataSQL();
 		updateData.addData("test", 999);
-		template.update(updateData);
+		try {
+			template.update(updateData);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -118,7 +133,11 @@ public class OperatorTest {
 		QueryDataResult checkData = new QueryDataResult();
 		checkData.addCheckData("test", 999);
 		checkData.addCheckData("test2", 666);
-		template.query(queryData, checkData);
+		try {
+			template.query(queryData, checkData);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		Assert.assertEquals("資料量不一致", true, checkData.checkSize());
 		Assert.assertEquals("資料內容不一致", true, checkData.checkData());
 	}
@@ -130,7 +149,11 @@ public class OperatorTest {
 	public void g_deleteData() {
 		DeleteDataSQL deleteData = new DeleteDataSQL();
 		deleteData.addData("test2");
-		template.update(deleteData);
+		try {
+			template.update(deleteData);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -141,51 +164,79 @@ public class OperatorTest {
 		QueryDataSQL queryData = new QueryDataSQL();
 		QueryDataResult checkData = new QueryDataResult();
 		checkData.addCheckData("test", 999);
-		template.query(queryData, checkData);
+		try {
+			template.query(queryData, checkData);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		Assert.assertEquals("資料量不一致", true, checkData.checkSize());
 		Assert.assertEquals("資料內容不一致", true, checkData.checkData());
 	}
 
 	/**
 	 * 交易案例
+	 * @throws SQLException 
 	 */
-	@Test
-	public void i_TransactionTable() {
+	@Test(expected = SQLException.class)
+	public void i_TransactionTable() throws SQLException {
 		TransactionSQL transaction = new TransactionSQL();
 		transaction.goal("test", 555);
 		transaction.addTwo("test11", 666);
-		template.update(transaction);
+		try {
+			template.update(transaction);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 
 		QueryDataSQL queryData = new QueryDataSQL();
 		QueryDataResult checkData = new QueryDataResult();
 		checkData.addCheckData("test", 555);
-		template.query(queryData, checkData);
+		try {
+			template.query(queryData, checkData);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		Assert.assertEquals("資料量不一致", true, checkData.checkSize());
 		Assert.assertEquals("資料內容不一致", true, checkData.checkData());
 
 		transaction.goal("test11", 666);
 		transaction.addTwo("test22", 777);
-		template.update(transaction);
+		try {
+			template.update(transaction);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 
 		QueryDataSQL queryData2 = new QueryDataSQL();
 		QueryDataResult checkData2 = new QueryDataResult();
 		checkData2.addCheckData("test", 555);
 		checkData2.addCheckData("test11", 666);
 		checkData2.addCheckData("test22", 777);
-		template.query(queryData2, checkData2);
+		try {
+			template.query(queryData2, checkData2);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		Assert.assertEquals("資料量不一致", true, checkData2.checkSize());
 		Assert.assertEquals("資料內容不一致", true, checkData2.checkData());
 
-		
 		transaction.goal("test123", 012);
 		transaction.addTwo("test22", 888);
 		/*
 		 * 下面一行測試交易失敗 當更新後發現已經有test22的資料，但是test22是primary key無法再新增，整筆交易會失敗．
 		 * 所以test123並不會寫入資料庫，在測試中會有SQL Exception 內容是Primary key Constraint error．
 		 */
-		template.update(transaction);
+		try {
+			template.update(transaction);
+		} catch (SQLException e) {
+			throw e;
+		}
 
-		template.query(queryData2, checkData2);
+		try {
+			template.query(queryData2, checkData2);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		Assert.assertEquals("資料量不一致", true, checkData2.checkSize());
 		Assert.assertEquals("資料內容不一致", true, checkData2.checkData());
 	}
@@ -196,7 +247,11 @@ public class OperatorTest {
 	@Test
 	public void j_dropTable() {
 		PreparedStatementCreator droptable = new DropTableSQL();
-		template.update(droptable);
+		try {
+			template.update(droptable);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**

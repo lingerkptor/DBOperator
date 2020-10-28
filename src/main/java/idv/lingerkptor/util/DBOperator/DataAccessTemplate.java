@@ -7,8 +7,6 @@ import java.sql.SQLException;
 
 public class DataAccessTemplate {
 
-	private PreparedStatement stat = null;
-	private ResultSet rs = null;
 	private ConnectPool pool = null;
 
 	@SuppressWarnings("unused")
@@ -17,6 +15,7 @@ public class DataAccessTemplate {
 
 	/**
 	 * Constructor
+	 * 
 	 * @param pool 連接池
 	 */
 	public DataAccessTemplate(ConnectPool pool) {
@@ -54,9 +53,10 @@ public class DataAccessTemplate {
 	 * @param prepared SQL實作
 	 * @param handler  查詢結果逐行如何處理
 	 */
-	public void query(PreparedStatementCreator prepared, RowCallbackHandler handler) {
+	public void query(PreparedStatementCreator prepared, RowCallbackHandler handler) throws SQLException {
+		ResultSet rs = null;
 		Connection conn = this.getConnection();
-
+		PreparedStatement stat = null;
 		try {
 			conn.setAutoCommit(true);
 			stat = prepared.createPreparedStatement(conn);
@@ -72,7 +72,7 @@ public class DataAccessTemplate {
 			} catch (SQLException e1) {
 				e1.printStackTrace();
 			}
-			e.printStackTrace();
+			throw e;
 		} finally {
 			// 歸還connect
 			pool.returnConnection(conn);
@@ -84,21 +84,22 @@ public class DataAccessTemplate {
 	 * 
 	 * @param prepared SQL實作
 	 */
-	public void update(PreparedStatementCreator prepared) {
+	public void update(PreparedStatementCreator prepared) throws SQLException {
 		Connection conn = this.getConnection();
+		PreparedStatement stat = null;
 		try {
 			conn.setAutoCommit(false);
 			stat = prepared.createPreparedStatement(conn);
 			stat.executeBatch();
 			conn.commit();
 		} catch (SQLException e) {
-			e.printStackTrace();
 			try {
 				conn.rollback();
 			} catch (SQLException e1) {
 				// rollback出錯
-				e1.printStackTrace();
+				throw e1;
 			}
+			throw e;
 		} finally {
 			// 歸還connect
 			pool.returnConnection(conn);
