@@ -53,20 +53,28 @@ public class DataAccessTemplate {
 	 * @param prepared SQL實作
 	 * @param handler  查詢結果逐行如何處理
 	 */
-	public void query(PreparedStatementCreator prepared, RowCallbackHandler handler) throws SQLException {
+	public void query(PreparedStatementCreator prepared, RowCallbackHandler handler)
+			throws SQLException {
 		ResultSet rs = null;
 		Connection conn = this.getConnection();
 		PreparedStatement stat = null;
 		try {
-			conn.setAutoCommit(true);
+			conn.setAutoCommit(false);
 			stat = prepared.createPreparedStatement(conn);
 
-			rs = stat.executeQuery();
+			rs = stat.getResultSet();
 			while (rs.next()) {
 				handler.processRow(rs);
 			}
 			rs.close();
 		} catch (SQLException e) {
+			try {
+				conn.close();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+			throw e;
+		} catch (NullPointerException e) {
 			try {
 				conn.close();
 			} catch (SQLException e1) {
@@ -86,11 +94,9 @@ public class DataAccessTemplate {
 	 */
 	public void update(PreparedStatementCreator prepared) throws SQLException {
 		Connection conn = this.getConnection();
-		PreparedStatement stat = null;
 		try {
 			conn.setAutoCommit(false);
-			stat = prepared.createPreparedStatement(conn);
-			stat.executeBatch();
+			prepared.createPreparedStatement(conn);
 			conn.commit();
 		} catch (SQLException e) {
 			try {
