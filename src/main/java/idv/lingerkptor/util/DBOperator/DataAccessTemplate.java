@@ -99,7 +99,7 @@ public class DataAccessTemplate {
 			conn.setAutoCommit(false);
 			prepared.createPreparedStatement(conn);
 			conn.commit();
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			try {
 				conn.rollback();
 			} catch (SQLException e1) {
