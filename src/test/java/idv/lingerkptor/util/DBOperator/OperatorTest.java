@@ -244,7 +244,7 @@ public class OperatorTest {
 	/**
 	 * 刪除資料表
 	 */
-//	@Test
+	@Test
 	public void j_dropTable() {
 		PreparedStatementCreator droptable = new DropTableSQL();
 		try {
