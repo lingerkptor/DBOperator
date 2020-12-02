@@ -25,6 +25,7 @@ public class DeleteDataSQL implements PreparedStatementCreator {
 					preps.setString(1, key);
 					preps.addBatch();
 				}
+				preps.executeBatch();
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

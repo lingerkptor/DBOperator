@@ -12,6 +12,7 @@ public class DropTableSQL implements PreparedStatementCreator {
 		try {
 			PreparedStatement prps = conn.prepareStatement(SQL);
 			prps.addBatch();
+			prps.executeBatch();
 			return prps;
 		} catch (SQLException e) {
 			e.printStackTrace();

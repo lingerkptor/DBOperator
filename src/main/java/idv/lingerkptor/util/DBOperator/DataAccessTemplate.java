@@ -59,7 +59,7 @@ public class DataAccessTemplate {
 		Connection conn = this.getConnection();
 		PreparedStatement stat = null;
 		try {
-			conn.setAutoCommit(false);
+			conn.setAutoCommit(true);
 			stat = prepared.createPreparedStatement(conn);
 
 			rs = stat.getResultSet();
@@ -75,6 +75,7 @@ public class DataAccessTemplate {
 			}
 			throw e;
 		} catch (NullPointerException e) {
+			e.printStackTrace();
 			try {
 				conn.close();
 			} catch (SQLException e1) {

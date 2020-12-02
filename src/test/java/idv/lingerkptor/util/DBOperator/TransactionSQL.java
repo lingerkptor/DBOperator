@@ -11,7 +11,7 @@ public class TransactionSQL implements PreparedStatementCreator {
 	private int value1, value2;
 
 	@Override
-	public PreparedStatement createPreparedStatement(Connection conn) {
+	public PreparedStatement createPreparedStatement(Connection conn) throws SQLException {
 		String SQL = "select count(*) from Test where test = ?;";
 		PreparedStatement preps = null;
 		ResultSet rs = null;
@@ -37,10 +37,12 @@ public class TransactionSQL implements PreparedStatementCreator {
 				preps.setInt(2, value1);
 			}
 			preps.addBatch();
-
+			preps.executeBatch();
 		} catch (SQLException e) {
 			e.printStackTrace();
+			throw e;
 		}
+
 		return preps;
 	}
 

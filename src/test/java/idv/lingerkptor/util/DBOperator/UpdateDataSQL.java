@@ -22,6 +22,7 @@ public class UpdateDataSQL implements PreparedStatementCreator {
 					preps.setString(2, key);
 					preps.addBatch();
 				}
+				preps.executeBatch();
 			}
 
 		} catch (SQLException e) {

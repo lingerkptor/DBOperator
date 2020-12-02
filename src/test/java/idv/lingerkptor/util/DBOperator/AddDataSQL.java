@@ -30,6 +30,7 @@ public class AddDataSQL implements PreparedStatementCreator {
 					preps.setInt(2, datas.get(key));
 					preps.addBatch();
 				}
+				preps.executeBatch();
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
