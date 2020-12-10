@@ -74,7 +74,7 @@ public class ConnectPool {
 	 * 取得可使用的connection
 	 * 
 	 * @return 從connection pool拿connection，如果pool都拿完的時候回傳null
-	 * @throws SQLException 
+	 * @throws SQLException
 	 * @throws Exception
 	 */
 	public Connection getConnection() throws DBOperatorException, SQLException {
@@ -86,30 +86,32 @@ public class ConnectPool {
 			case CLOSING:
 				throw new DBOperatorException("ConnectPool關閉中，已不提供服務，.", STATE.CLOSING);
 			case CLOSED:
-				throw new DBOperatorException("ConnectPool已關閉，已不提供服務，如果想再次使用請重新給定資料庫．.", STATE.CLOSED);
+				throw new DBOperatorException("ConnectPool已關閉，已不提供服務，如果想再次使用請重新給定資料庫．.",
+						STATE.CLOSED);
 			default:
 				break;
 			}
 			synchronized (usingConn) {
-				if (usingConn.size() < db.getMaxConnection()) {
-					synchronized (pool) {
-						if (pool.isEmpty()) {
-							// 資料庫連接
-							conn = db.conecting();
-						} else {
-							conn = pool.get(0);
-							pool.remove(0);
-						}
-						usingConn.add(conn);
-					}
-				} else
+				while (usingConn.size() == db.getMaxConnection()) {
 					try {
 						usingConn.wait();
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
+				}
+				synchronized (pool) {
+					if (pool.isEmpty()) {
+						// 資料庫連接
+						conn = db.conecting();
+					} else {
+						conn = pool.get(0);
+						pool.remove(0);
+					}
+					usingConn.add(conn);
+				}
 			}
 		}
+
 		return conn;
 	}
 

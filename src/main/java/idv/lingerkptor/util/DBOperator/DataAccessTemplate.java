@@ -24,8 +24,10 @@ public class DataAccessTemplate {
 
 	/**
 	 * 取得˙資料庫連接
+	 * 
+	 * @throws SQLException
 	 */
-	private Connection getConnection() {
+	private Connection getConnection() throws SQLException {
 		try {
 			return pool.getConnection();
 		} catch (DBOperatorException e) {
@@ -42,7 +44,7 @@ public class DataAccessTemplate {
 			}
 		} catch (SQLException e) {
 			System.out.println("連線失敗");
-			e.printStackTrace();
+			throw e;
 		}
 		return null;
 	}
@@ -74,14 +76,6 @@ public class DataAccessTemplate {
 				e1.printStackTrace();
 			}
 			throw e;
-		} catch (NullPointerException e) {
-			e.printStackTrace();
-			try {
-				conn.close();
-			} catch (SQLException e1) {
-				e1.printStackTrace();
-			}
-			throw e;
 		} finally {
 			// 歸還connect
 			pool.returnConnection(conn);
@@ -99,12 +93,12 @@ public class DataAccessTemplate {
 			conn.setAutoCommit(false);
 			prepared.createPreparedStatement(conn);
 			conn.commit();
-		} catch (Exception e) {
+		}catch (Exception e) {
 			try {
 				conn.rollback();
 			} catch (SQLException e1) {
 				// rollback出錯
-				throw e1;
+				e1.printStackTrace();
 			}
 			throw e;
 		} finally {
